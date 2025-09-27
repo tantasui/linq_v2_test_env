@@ -1,19 +1,16 @@
-import type React from "react"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
-import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { WalletProvider } from "@/components/wallet-context"
+import { MyStenProviders } from "@/components/mysten-providers"
 import { Suspense } from "react"
-
-const geistSans = GeistSans.variable
-const geistMono = GeistMono.variable
+import { Analytics } from "@vercel/analytics/react"
+import '@mysten/dapp-kit/dist/index.css'
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.app",
+  title: "Digital Wallet",
+  description: "A modern digital wallet application",
 }
 
 export default function RootLayout({
@@ -23,9 +20,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${geistSans} ${geistMono} antialiased`}>
+      <body className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
         <Suspense fallback={<div>Loading...</div>}>
-          <WalletProvider>{children}</WalletProvider>
+          <MyStenProviders>
+            <WalletProvider>{children}</WalletProvider>
+          </MyStenProviders>
         </Suspense>
         <Analytics />
       </body>

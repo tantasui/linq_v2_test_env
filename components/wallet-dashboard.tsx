@@ -5,11 +5,12 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowUpRight, ArrowDownLeft, Plus, Send, Eye, EyeOff, Wallet } from "lucide-react"
 import Link from "next/link"
+import { ConnectButton } from "@mysten/dapp-kit"
 import { useWallet } from "./wallet-context"
 
 export function WalletDashboard() {
   const [showBalance, setShowBalance] = useState(true)
-  const { balance, transactions, isConnected, connectedBank } = useWallet()
+  const { balance, transactions, isConnected, connectedBank, isRealWalletConnected, currentAccount } = useWallet()
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -38,7 +39,7 @@ export function WalletDashboard() {
           </Button>
         </div>
 
-        {!isConnected ? (
+        {!isRealWalletConnected ? (
           <Card className="p-6 bg-card border-border mb-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
@@ -48,13 +49,30 @@ export function WalletDashboard() {
               <p className="text-sm text-muted-foreground mb-4">
                 Connect your bank account to start sending and receiving money
               </p>
-              <Link href="/connect">
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Connect Wallet</Button>
-              </Link>
+              <ConnectButton />
             </div>
           </Card>
         ) : (
           <>
+            <Card className="p-6 bg-card border-border mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Wallet className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Sui Wallet Connected</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {currentAccount?.address ? 
+                        `${currentAccount.address.slice(0, 6)}...${currentAccount.address.slice(-4)}` : 
+                        'Wallet Connected'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
             {/* Balance Card */}
             <Card className="p-6 bg-card border-border">
               <div className="text-center">
@@ -82,7 +100,7 @@ export function WalletDashboard() {
         )}
       </div>
 
-      {isConnected && transactions.length > 0 && (
+      {isRealWalletConnected && transactions.length > 0 && (
         <div className="px-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h3>
 
@@ -127,7 +145,7 @@ export function WalletDashboard() {
         </div>
       )}
 
-      {isConnected && transactions.length === 0 && (
+      {isRealWalletConnected && transactions.length === 0 && (
         <div className="px-6">
           <Card className="p-8 bg-card border-border">
             <div className="text-center">

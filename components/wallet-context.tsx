@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import { useCurrentAccount, useConnectWallet, useDisconnectWallet } from '@mysten/dapp-kit'
 
 interface Transaction {
   id: string
@@ -21,6 +22,11 @@ interface WalletContextType {
   addTransaction: (transaction: Omit<Transaction, "id" | "date">) => void
   connectWallet: (bankName: string) => void
   updateBalance: (amount: number) => void
+  // Real wallet connection state
+  currentAccount: any
+  isRealWalletConnected: boolean
+  connectRealWallet: () => void
+  disconnectRealWallet: () => void
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined)
@@ -30,6 +36,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [isConnected, setIsConnected] = useState(false)
   const [connectedBank, setConnectedBank] = useState("")
+
+  // Mysten dApp Kit hooks
+  const currentAccount = useCurrentAccount()
+  const { mutate: connectWalletMutation } = useConnectWallet()
+  const { mutate: disconnectWalletMutation } = useDisconnectWallet()
+  
+  const isRealWalletConnected = !!currentAccount
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -79,6 +92,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("walletBalance", amount.toString())
   }
 
+  const connectRealWallet = () => {
+    // This will trigger the wallet selection modal
+    // The mutation will be handled by the ConnectButton component
+    console.log("Connect wallet requested")
+  }
+
+  const disconnectRealWallet = () => {
+    disconnectWalletMutation()
+  }
+
   return (
     <WalletContext.Provider
       value={{
@@ -89,6 +112,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         addTransaction,
         connectWallet,
         updateBalance,
+        currentAccount,
+        isRealWalletConnected,
+        connectRealWallet,
+        disconnectRealWallet,
       }}
     >
       {children}
